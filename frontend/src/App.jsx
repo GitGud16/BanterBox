@@ -1,31 +1,64 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useUsernameHook from "./hooks/usernameHook";
 import SendMessage from "./components/sendMessage";
 import DisplayMessages from "./components/displayMessages";
-import {io} from "socket.io-client";
+import useSocketHook from "./hooks/socketHook";
+import NewChat from "./components/newChat";
+import useChatIdHook from "./hooks/chatIdHook";
+import useAuthHook from "./hooks/authHook";
+import Login from "./components/login";
 import "./App.css";
 
+//TODO: user can copy chatID with a button to clipboard maybe
+//TODO: user can change senderName and getting saved in the localStorage too
+
 function App() {
-  const sender = useUsernameHook();
   const [messages, setMessages] = useState([]);
+  const sender = useUsernameHook();
 
-  const socket = io("/");
+  const chatID = useChatIdHook();
+  const { isLoggedIn } = useAuthHook();
+  const socket = useSocketHook({ chatID, isLoggedIn });
+
+  console.log("user log in", isLoggedIn);
+  useEffect(() => {
+    if (socket != null) {
+      socket.on("message", (newMessage) => {
+        setMessages([...messages, newMessage]);
+      });
+
+      socket.on("otpsent", () => {});
+    }
+  }, [socket, messages, setMessages]);
+
   return (
-
     <div className="App">
-      <div className="grid grid-cols-1">
+      {isLoggedIn && (
+        <div className="grid grid-cols-2">
+          <div className="mt-10 border-2">
+            <NewChat />
+          </div>
 
-        <div className="mt-10 border-2 border-black max-h-[70vh] overflow-y-auto">
-          <DisplayMessages messages={messages} />
+          <div className="mt-10 border-2 border-black max-h-[70vh] overflow-y-auto">
+            <DisplayMessages messages={messages} />
+          </div>
+
+          <SendMessage
+            sender={sender}
+            messages={messages}
+            setMessages={setMessages}
+            socket={socket}
+            chatID={chatID}
+          />
         </div>
-
-        <SendMessage
-          sender={sender}
-          messages={messages}
-          setMessages={setMessages}
-        />
-        
-      </div>
+      )}
+      {!isLoggedIn && (
+        <>
+          <div className="flex pt-[20%] flex-col">
+            <Login socket={socket} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

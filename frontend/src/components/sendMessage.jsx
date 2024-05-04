@@ -1,5 +1,5 @@
 import  { useState } from "react";
-function SendMessage({ sender, messages, setMessages }) {
+function SendMessage({ sender, messages, setMessages, socket, chatID }) {
   const [messageInput, setMessageInput] = useState("");
 
   const sendMessage = () => {
@@ -8,8 +8,12 @@ function SendMessage({ sender, messages, setMessages }) {
         id: messages.length + 1,
         text: messageInput,
         time: new Date().getTime(),
+        chatID,
         sender,
       };
+      console.log('before emit');
+      const emitValue= socket.emit('message', newMessage);
+      console.log('after emit', emitValue);
       setMessages((prevMessages) => [...prevMessages, newMessage]);
       setMessageInput("");
     }
