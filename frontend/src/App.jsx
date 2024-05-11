@@ -26,8 +26,7 @@ function App() {
       socket.on("message", (newMessage) => {
         setMessages([...messages, newMessage]);
       });
-
-      socket.on("otpsent", () => {});
+      console.log();
     }
   }, [socket, messages, setMessages]);
 

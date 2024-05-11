@@ -8,7 +8,8 @@ const io = new Server(server);
 const { dbConnect } = require("./db");
 const sendOtpEmail = require('./services/email')
 const User = require('./models/user')
-
+const {login}=require('./services/user')
+const {otpVerification}=require('./services/user')
 
 
 dbConnect();
@@ -34,21 +35,9 @@ io.on("connection", (socket) => {
   const chatID = socket.request._query.chatID;
 
   const isLoggedIn = socket.request._query.isLoggedIn;
-
   socket.on('login',async (data)=>{//TODO: revise this part, logic is a little bit off
-    //TODO:
-    console.log('login detected');
-    const otp = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
-    console.log(otp);
-    sendOtpEmail({email:data.email, otp})
-
-    let user = await User.findOne({where:{email:data.email}})
-    if(user){
-      user.otp=otp
-      await user.save
-    }else{
-      user = await User.create({email:data.email, otp})
-    }
+    console.log('data on login is : ', data);
+    await login(data)
     socket.emit('otpsent')
     // const [user, created] = await User.findOrCreate({
     //   where:{email:data.email},
@@ -59,8 +48,17 @@ io.on("connection", (socket) => {
     // })
 
   });
-  socket.on('otpVerification', (otp)=>{
-    //TODO:
+  socket.on('otpVerification', async (data)=>{
+    console.log(data);
+    const result = await otpVerification(data)
+    if(result.verified == false) {
+      console.log('resultJWT: ', result);
+      socket.emit('otpFailed')
+    }
+    else {
+      socket.emit('otpSuccess', {token:result.token})}
+    
+    
   });
   if (!isLoggedIn) return;
 
