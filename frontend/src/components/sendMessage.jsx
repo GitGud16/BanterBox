@@ -11,8 +11,9 @@ function SendMessage({ sender, messages, setMessages, socket, chatID }) {
         chatID,
         sender,
       };
+      const token = window.localStorage.getItem("token");
       console.log('before emit');
-      const emitValue= socket.emit('message', newMessage);
+      const emitValue= socket.emit('message', {message:newMessage, token});
       console.log('after emit', emitValue);
       setMessages((prevMessages) => [...prevMessages, newMessage]);
       setMessageInput("");

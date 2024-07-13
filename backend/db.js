@@ -1,5 +1,6 @@
 const sequelize = require('./sequelize')
 require('./models/user')
+require('./models/chat')
 
   const dbConnect= async()=>{
       try {

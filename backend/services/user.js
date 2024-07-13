@@ -37,9 +37,25 @@ const otpVerification = async (data) =>{
 
 
 }
+
+const validateToken =  (token) => {
+  try {
+
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+    // const user = await User.findOne({ where: { id: decode.userID } });
+    console.log('not error in token validation');
+    return decode;
+  } catch (error) {
+    console.log(error,'hi');
+    return false;
+  }
+
+
+};
 module.exports={
     login,
-    otpVerification
+    otpVerification,
+    validateToken
 }
 
 

@@ -17,8 +17,8 @@ function App() {
   const sender = useUsernameHook();
 
   const chatID = useChatIdHook();
-  const { isLoggedIn } = useAuthHook();
-  const socket = useSocketHook({ chatID, isLoggedIn });
+  const socket = useSocketHook({ chatID });
+  const { isLoggedIn } = useAuthHook({ socket });
 
   console.log("user log in", isLoggedIn);
   useEffect(() => {

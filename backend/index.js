@@ -8,8 +8,7 @@ const io = new Server(server);
 const { dbConnect } = require("./db");
 const sendOtpEmail = require('./services/email')
 const User = require('./models/user')
-const {login}=require('./services/user')
-const {otpVerification}=require('./services/user')
+const {otpVerification, validateToken, login}=require('./services/user')
 
 
 dbConnect();
@@ -70,9 +69,21 @@ server.listen(3000, () => {
   console.log("listening on *:3000");
 });
 
-const emitToPrivateChat = ({ socket, chatID }) => {
-  socket.on("message", (msg) => {
-    filteredSockets.get(chatID).forEach((oldSocket, socketID) => {
+const emitToPrivateChat =  ({ socket, chatID }) => {
+  socket.on("message",  (data) => {
+const msg = data.message;
+const token = data.token;
+
+    // if (!filteredSockets.has(chatID)) return;
+
+    // if (!filteredSockets.get(chatID).has(socket.id)) return;
+    const isValid =  validateToken(token)
+    if(!isValid){
+      console.log('invalid token');
+      return
+    }
+
+    filteredSockets.get(chatID).forEach((oldSocket, socketID) => {//js Maps forEach loop are so misleading ==> should be (id,socket) 
       if (oldSocket === socket) return; //transport message to all except the one who sent the message, otherwise this will duplicate the message
       oldSocket.emit("message", msg);
     });
