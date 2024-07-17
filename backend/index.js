@@ -7,8 +7,9 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const { dbConnect } = require("./db");
 const sendOtpEmail = require('./services/email')
-const User = require('./models/user')
-const {otpVerification, validateToken, login}=require('./services/user')
+const Chat = require('./models/chat')
+const {otpVerification, validateToken, login}=require('./services/user');
+const { where } = require("sequelize");
 
 
 dbConnect();
@@ -23,15 +24,17 @@ dbConnect();
 
 
 
-app.get("/", (req, res) => {
-  res.send("hello from backend server");
-});
+// app.get("/", (req, res) => {
+//   res.send("hello from backend server");
+// });
 
 const filteredSockets = new Map();
 
 io.on("connection", (socket) => {
   console.log("a user connected");
   const chatID = socket.request._query.chatID;
+
+
 
   const isLoggedIn = socket.request._query.isLoggedIn;
   socket.on('login',async (data)=>{//TODO: revise this part, logic is a little bit off
@@ -70,18 +73,26 @@ server.listen(3000, () => {
 });
 
 const emitToPrivateChat =  ({ socket, chatID }) => {
-  socket.on("message",  (data) => {
-const msg = data.message;
-const token = data.token;
+  socket.on("message",  async(data) => {
 
+    
+    const msg = data.message;
+    const token = data.token;
+    
     // if (!filteredSockets.has(chatID)) return;
-
+    
     // if (!filteredSockets.get(chatID).has(socket.id)) return;
     const isValid =  validateToken(token)
     if(!isValid){
       console.log('invalid token');
       return
     }
+    console.log(isValid);
+    await Chat.findOrCreate(
+      {where:{ name : chatID },
+        defaults:{ownerId:isValid.userID}
+       }
+    )
 
     filteredSockets.get(chatID).forEach((oldSocket, socketID) => {//js Maps forEach loop are so misleading ==> should be (id,socket) 
       if (oldSocket === socket) return; //transport message to all except the one who sent the message, otherwise this will duplicate the message

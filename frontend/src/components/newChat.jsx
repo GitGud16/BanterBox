@@ -9,8 +9,15 @@ const newChat = ()=>{
     
         window.location.href = `/?chatID=${newChatId}`
       }
+
+      
+
+
       return(
         <>
+          
+
+
          <button 
           className="border-2 p-[0.35em] rounded-3xl"
           onClick={generateChatID}

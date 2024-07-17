@@ -30,12 +30,26 @@ function App() {
     }
   }, [socket, messages, setMessages]);
 
+
+  const setPrivateChat = ()=>{
+        
+  }
+
+
   return (
     <div className="App">
       {isLoggedIn && (
         <div className="grid grid-cols-2">
+
+
           <div className="mt-10 border-2">
             <NewChat />
+          <button 
+          className="border-2 p-[0.35em] rounded-3xl"
+          onClick={()=>{console.log('hi');}}
+          >
+            set Private
+          </button>
           </div>
 
           <div className="mt-10 border-2 border-black max-h-[70vh] overflow-y-auto">
