@@ -2,12 +2,14 @@ import { v4 as uuidv4} from 'uuid'
 
 
 
-const newChat = ()=>{
+const newChat = ({socket})=>{
 
     const generateChatID = ()=>{
+      const token = window.localStorage.getItem("token");
         const newChatId = uuidv4()
     
         window.location.href = `/?chatID=${newChatId}`
+  socket.emit('newChat', {chatID:newChatId, token})
       }
 
       

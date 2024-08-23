@@ -5,9 +5,9 @@ function SendMessage({ sender, messages, setMessages, socket, chatID }) {
   const sendMessage = () => {
     if (messageInput && messageInput.length > 0) {
       const newMessage = {
-        id: messages.length + 1,
+        // id: messages.length + 1,
         text: messageInput,
-        time: new Date().getTime(),
+        // time: new Date().getTime(),
         chatID,
         sender,
       };

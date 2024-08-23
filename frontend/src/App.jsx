@@ -7,7 +7,11 @@ import NewChat from "./components/newChat";
 import useChatIdHook from "./hooks/chatIdHook";
 import useAuthHook from "./hooks/authHook";
 import Login from "./components/login";
+import SetPrivate from "./components/setChatPrivacy";
 import "./App.css";
+import useGetAllMessagesHook from "./hooks/getAllMessagesHook";
+import useGetAllChatsHook from "./hooks/getAllChatsHook";
+
 
 //TODO: user can copy chatID with a button to clipboard maybe
 //TODO: user can change senderName and getting saved in the localStorage too
@@ -15,12 +19,24 @@ import "./App.css";
 function App() {
   const [messages, setMessages] = useState([]);
   const sender = useUsernameHook();
-
+  const [chats, setChats] = useState([]);
   const chatID = useChatIdHook();
   const socket = useSocketHook({ chatID });
+  useGetAllChatsHook({ socket, setChats });
+  useGetAllMessagesHook({ socket, chatID, setMessages });
   const { isLoggedIn } = useAuthHook({ socket });
 
   console.log("user log in", isLoggedIn);
+
+  // const getMessages = async () => {
+
+  //   socket.emit('getMessages', {chatID})
+  //   socket.on('getMessages', async (data)=>{
+  //     console.log(data);
+  //   })
+
+  // };
+
   useEffect(() => {
     if (socket != null) {
       socket.on("message", (newMessage) => {
@@ -29,28 +45,28 @@ function App() {
       console.log();
     }
   }, [socket, messages, setMessages]);
-
-
-  const setPrivateChat = ()=>{
-        
-  }
-
-
   return (
     <div className="App">
       {isLoggedIn && (
         <div className="grid grid-cols-2">
+          <div className=" flex flex-col  ">
 
+            <div className=" flex justify-center max-h-[100px] ">
+              <NewChat socket={socket} />
 
-          <div className="mt-10 border-2">
-            <NewChat />
-          <button 
-          className="border-2 p-[0.35em] rounded-3xl"
-          onClick={()=>{console.log('hi');}}
-          >
-            set Private
-          </button>
+              <SetPrivate socket={socket} chatID={chatID} />
+            </div>
+            <div className=" flex flex-col ">
+                {chats.map((chat) => (
+                  <div key={chat.name}  className="border-2   border-black">
+                    <a href={`/?chatID=${chat.name}`}>
+                    <p>{chat.name =='null'? 'General Chat': chat.name}</p>
+                    </a>
+                  </div>
+                ))}
+            </div>
           </div>
+            
 
           <div className="mt-10 border-2 border-black max-h-[70vh] overflow-y-auto">
             <DisplayMessages messages={messages} />

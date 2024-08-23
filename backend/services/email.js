@@ -17,5 +17,15 @@ const sendOtpEmail = ({email, otp}) => {
 
 }
 
-module.exports=sendOtpEmail
+const sendInvitationEmail = ({email,url}) => {
+
+  resend.emails.send({
+    from: 'onboarding@resend.dev',
+    to: email,
+    subject:"BanterBox Chat Invitation",
+    html: `<h1>You have been invited to join BanterBox. Click on the link below to join. </h1><h1>${url}</h1>`
+  })
+}
+
+module.exports={sendOtpEmail,sendInvitationEmail}
 

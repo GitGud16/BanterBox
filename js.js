@@ -26,7 +26,7 @@
         return true
         
     }
-    console.log(isAnagram('jar', 'jam'));
+    // console.log(isAnagram('jar', 'jam'));
 
 
 // let soso=[4,5,1,5,4]
