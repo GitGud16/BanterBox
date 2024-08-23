@@ -12,10 +12,13 @@ const {handleLogin, handleOtpVerification} = require('./sockets/auth')
 const {newChat, setChatPrivacy,  emitToPrivateChat} = require('./sockets/chat')
 const {inviteUserToChat,} = require('./sockets/user');
 const { validateToken } = require('./services/user');
+const path = require('path')
+
 dbConnect();
 
 
-
+const buildPath = path.normalize(path.join(__dirname,'../frontend/dist'));
+app.use(express.static(buildPath))
 
 const domain = process.env.PUPLIC_URL;
 
