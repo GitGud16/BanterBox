@@ -1,6 +1,9 @@
-import  { useState } from "react";
+import { useState, useContext } from "react";
+import ThemeContext from '../contexts/ThemeContext';
+
 function SendMessage({ sender, messages, setMessages, socket, chatID }) {
   const [messageInput, setMessageInput] = useState("");
+  const { theme } = useContext(ThemeContext);
 
   const sendMessage = () => {
     if (messageInput && messageInput.length > 0) {
@@ -20,8 +23,6 @@ function SendMessage({ sender, messages, setMessages, socket, chatID }) {
     }
   }
 
-
-
   const handleKeyDown = (e) => {
     console.log('hi');
     if (e.key === "Enter") {
@@ -31,24 +32,27 @@ function SendMessage({ sender, messages, setMessages, socket, chatID }) {
   }
 
   return (
-    <>
-      <div className="mt-10 grid grid-cols-2 bottom-0 absolute inset-x-0 mx-10 mb-2">
+    <div className={`p-4 border-t border-gray-700 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`}>
+      <div className="flex">
         <textarea
           id="new-message"
-          className="border-2 border-black"
+          className={`flex-grow border rounded-l-lg p-2 resize-none ${theme === 'dark' ? 'bg-gray-700 text-gray-100' : 'bg-white text-gray-900'}`}
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          placeholder="Type a message..."
+          rows="2"
         />
         <button
           id="send-message"
-          className="border-2 border-black max-w-full justify-self-end"
+          className="bg-orange-600 text-white px-4 rounded-r-lg hover:bg-orange-700"
           onClick={sendMessage}
         >
           Send
         </button>
       </div>
-    </>
+    </div>
   );
 }
+
 export default SendMessage;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import useUsernameHook from "./hooks/usernameHook";
 import SendMessage from "./components/sendMessage";
 import DisplayMessages from "./components/displayMessages";
@@ -11,7 +11,8 @@ import SetPrivate from "./components/setChatPrivacy";
 import "./App.css";
 import useGetAllMessagesHook from "./hooks/getAllMessagesHook";
 import useGetAllChatsHook from "./hooks/getAllChatsHook";
-
+import { ThemeProvider } from "./contexts/ThemeContext";
+import ThemeToggle from "./components/ThemeToggle";
 
 //TODO: user can copy chatID with a button to clipboard maybe
 //TODO: user can change senderName and getting saved in the localStorage too
@@ -25,6 +26,29 @@ function App() {
   useGetAllChatsHook({ socket, setChats });
   useGetAllMessagesHook({ socket, chatID, setMessages });
   const { isLoggedIn } = useAuthHook({ socket });
+  const [theme, setTheme] = useState('dark');
+  const [unreadCounts, setUnreadCounts] = useState({});
+
+  useEffect(() => {
+    if (socket != null) {
+      socket.on("message", (newMessage) => {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        if (newMessage.chatID !== chatID) {
+          setUnreadCounts((prevCounts) => ({
+            ...prevCounts,
+            [newMessage.chatID]: (prevCounts[newMessage.chatID] || 0) + 1,
+          }));
+        }
+      });
+    }
+  }, [socket, chatID]);
+
+  const handleChatClick = (clickedChatID) => {
+    setUnreadCounts((prevCounts) => ({
+      ...prevCounts,
+      [clickedChatID]: 0,
+    }));
+  };
 
   console.log("user log in", isLoggedIn);
 
@@ -46,49 +70,58 @@ function App() {
     }
   }, [socket, messages, setMessages]);
   return (
-    <div className="App">
-      {isLoggedIn && (
-        <div className="grid grid-cols-2">
-          <div className=" flex flex-col  ">
-
-            <div className=" flex justify-center max-h-[100px] ">
-              <NewChat socket={socket} />
-
-              <SetPrivate socket={socket} chatID={chatID} />
-            </div>
-            <div className=" flex flex-col ">
+    <ThemeProvider value={{ theme, setTheme }}>
+      <div className={`App h-screen flex flex-col ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
+        {isLoggedIn ? (
+          <div className="flex-grow flex flex-col md:flex-row overflow-hidden">
+            <div className="w-full md:w-1/4 flex flex-col border-b md:border-r border-gray-700">
+              <div className="p-4 flex justify-between items-center">
+                <NewChat socket={socket} />
+                <ThemeToggle />
+              </div>
+              <div className="flex-grow overflow-y-auto">
                 {chats.map((chat) => (
-                  <div key={chat.name}  className="border-2   border-black">
-                    <a href={`/?chatID=${chat.name}`}>
-                    <p>{chat.name =='null'? 'General Chat': chat.name}</p>
-                    </a>
-                  </div>
+                  <a
+                    key={chat.name}
+                    href={`/?chatID=${chat.name}`}
+                    className={`block p-3 ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-200'} ${
+                      unreadCounts[chat.name] > 0 ? 'animate-blink' : ''
+                    } relative`}
+                    onClick={() => handleChatClick(chat.name)}
+                  >
+                    <p>{chat.name == 'null' ? 'General Chat' : chat.name}</p>
+                    {unreadCounts[chat.name] > 0 && (
+                      <span className="absolute top-1 right-1 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+                        {unreadCounts[chat.name]}
+                      </span>
+                    )}
+                  </a>
                 ))}
+              </div>
+            </div>
+            <div className="w-full md:w-3/4 flex flex-col">
+              <div className="p-4 border-b border-gray-700">
+                <SetPrivate socket={socket} chatID={chatID} />
+              </div>
+              <div className="flex-grow overflow-y-auto">
+                <DisplayMessages messages={messages} />
+              </div>
+              <SendMessage
+                sender={sender}
+                messages={messages}
+                setMessages={setMessages}
+                socket={socket}
+                chatID={chatID}
+              />
             </div>
           </div>
-            
-
-          <div className="mt-10 border-2 border-black max-h-[70vh] overflow-y-auto">
-            <DisplayMessages messages={messages} />
-          </div>
-
-          <SendMessage
-            sender={sender}
-            messages={messages}
-            setMessages={setMessages}
-            socket={socket}
-            chatID={chatID}
-          />
-        </div>
-      )}
-      {!isLoggedIn && (
-        <>
-          <div className="flex pt-[20%] flex-col">
+        ) : (
+          <div className="flex-grow flex items-center justify-center">
             <Login socket={socket} />
           </div>
-        </>
-      )}
-    </div>
+        )}
+      </div>
+    </ThemeProvider>
   );
 }
 
