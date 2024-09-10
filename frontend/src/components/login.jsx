@@ -5,6 +5,7 @@ import Modal from './Modal';
 function Login({ socket }) {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [otpFromBackend,setOtpFromBackend] = useState("")//temporary solution for email
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const { theme } = useContext(ThemeContext);
 
@@ -25,8 +26,10 @@ function Login({ socket }) {
 
   useEffect(() => {
     if (!socket) return;
-    socket.on("otpsent", () => {
+    socket.on("otpsent", (data) => {
       setIsOtpModalOpen(true);
+      setOtpFromBackend(data.otp)
+
     });
 
     socket.on('otpFailed', () => {
@@ -74,7 +77,10 @@ function Login({ socket }) {
         onConfirm={handleOtpSubmit}
         title="OTP Verification"
       >
+        <div className="flex flex-col">
+              <label htmlFor="otp">(temporary solution to email) Your OTP is: {otpFromBackend}</label>
         <input
+        id="otp"
           type="text"
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
@@ -83,6 +89,7 @@ function Login({ socket }) {
             theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
           }`}
         />
+        </div>
       </Modal>
     </div>
   );

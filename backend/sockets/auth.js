@@ -5,8 +5,8 @@ const handleLogin = (socket) => {
 
     socket.on('login', async (data) => {//TODO: revise this part, logic is a little bit off
         console.log('data on login is : ', data);
-        await login(data)
-        socket.emit('otpsent')
+     const otp =   await login(data)
+        socket.emit('otpsent',{otp})
         // const [user, created] = await User.findOrCreate({
         //   where:{email:data.email},
         //   defaults:{

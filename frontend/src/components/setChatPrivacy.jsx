@@ -72,13 +72,14 @@ export default function SetPrivate({ chatID, socket }) {
     <>
       <div className="flex items-center space-x-1 md:space-x-2">
         <button className={buttonClass} onClick={() => setChatPrivacy(1)}>
-          Private
+          Set Private
         </button>
-        <button className={buttonClass} onClick={openInviteModal}>
+        <button disabled className={buttonClass + "bg-gray hover:bg-gray cursor-not-allowed"} onClick={openInviteModal}>
           Invite
+          {/* TODO: open this after fixing email thing */}
         </button>
-        <button className={buttonClass} onClick={() => setChatPrivacy(0)}>
-          Public
+        <button className={buttonClass } onClick={() => setChatPrivacy(0)}>
+          Set Public
         </button>
         <img
           className="w-4 h-4 md:w-6 md:h-6"

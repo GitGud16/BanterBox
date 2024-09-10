@@ -14,8 +14,10 @@ const login = async (data) => {
         if(user){
           user.otp=otp
           await user.save()
+          return otp
         }else{
           user = await User.create({email:data.email, otp})
+          return null
         }
 
 }
