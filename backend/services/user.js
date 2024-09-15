@@ -17,7 +17,7 @@ const login = async (data) => {
           return otp
         }else{
           user = await User.create({email:data.email, otp})
-          return null
+          return otp// null
         }
 
 }
